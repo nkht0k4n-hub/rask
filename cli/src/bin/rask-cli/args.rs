@@ -14,6 +14,9 @@ pub struct Args {
 
     #[command(subcommand)]
     pub target: Target,
+
+    #[arg(short = 'n', long = "username")]
+    pub target_user: Option<String>,
 }
 
 #[derive(Debug, Parser)]

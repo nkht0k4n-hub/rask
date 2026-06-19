@@ -26,8 +26,8 @@ impl Rask {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct IdNameSet {
-    id: usize,
-    name: String,
+    pub id: usize,
+    pub name: String,
 }
 
 #[derive(Debug, Error)]

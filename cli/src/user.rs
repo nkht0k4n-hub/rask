@@ -9,6 +9,7 @@ pub struct User;
 pub struct UserResponse {
     pub id: usize,
     pub name: String,
+    pub screen_name: String,
     pub created_at: String,
     pub updated_at: String,
     pub url: String,
