@@ -8,7 +8,8 @@ use rask::project::*;
 use rask::task::*;
 use rask::user::*;
 use rask::Rask;
-use crate::utils::user_name_to_id;
+use crate::utils::filter_tasks_by_user;
+
 
 fn main() -> Result<()> {
     let args = Args::parse();
@@ -30,31 +31,16 @@ fn main() -> Result<()> {
                 Task::save(new_task).context("Failed to save new task")?;
                 println!("Success to add new task");
             }
-            TaskAction::List => {
+            TaskAction::List(list_args) => {
                 let tasks = Task::list().context("Failed to get Task list")?;
 
-                if args.target_user!=None{
-                    let users = User::list().context("Failed to get User list")?;
-                    let user_id = match user_name_to_id(users, &args.target_user.unwrap()) {
-                        Some(id) => id,
-                        None => {
-                            eprintln!("User not found");
-                            return Ok(());
-                        }
-                    };
-                    
-                    let mut list_up:Vec<TaskResponse>=vec![];
-                    for task in tasks {
-                        if  task.assigner.id==user_id{
-                            list_up.push(task);
-                        }
-                    }
+                if let Some(target_user) = &list_args.username {
+                    let list_up = filter_tasks_by_user(tasks, target_user)?;
                     let json_str = serde_json::to_string(&list_up)?;
-                    println!("{}",json_str);
-                }else {
-                    println!("{:?}",tasks);
+                    println!("{}", json_str);
+                } else {
+                    println!("{:?}", tasks);
                 }
- 
             }
         },
         Target::User(action) => match action {
@@ -77,3 +63,5 @@ fn main() -> Result<()> {
 
     Ok(())
 }
+
+

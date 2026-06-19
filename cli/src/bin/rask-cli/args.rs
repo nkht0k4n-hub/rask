@@ -15,8 +15,8 @@ pub struct Args {
     #[command(subcommand)]
     pub target: Target,
 
-    #[arg(short = 'n', long = "username")]
-    pub target_user: Option<String>,
+    // #[arg(short = 'n', long = "username",global=true)]
+    // pub target_user: Option<String>,
 }
 
 #[derive(Debug, Parser)]
@@ -40,7 +40,13 @@ pub enum TaskAction {
     Create(TaskCreateArgs),
 
     /// List tasks
-    List,
+    List(TaskListArgs),
+}
+
+#[derive(Debug, Parser)]
+pub struct TaskListArgs {
+    #[arg(short = 'n', long = "username")]
+    pub username: Option<String>,
 }
 
 #[derive(Debug, Parser)]

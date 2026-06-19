@@ -10,6 +10,7 @@ pub struct UserResponse {
     pub id: usize,
     pub name: String,
     pub screen_name: String,
+    pub active: bool,
     pub created_at: String,
     pub updated_at: String,
     pub url: String,
