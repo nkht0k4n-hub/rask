@@ -58,23 +58,23 @@ impl Document {
         Ok(())
     }
 
-    #[allow(clippy::too_many_arguments)]
     pub fn search(
         docs: &[DocumentResponse],
         id: Option<usize>,
-        content: &[String],
+        content: Option<&[String]>,
         creator_id: Option<usize>,
-        creator_name: &[String],
-        description: &[String],
+        creator_name: Option<&[String]>,
+        description: Option<&[String]>,
         project_id: Option<usize>,
-        project_name: &[String],
+        project_name: Option<&[String]>,
         created_at: Option<DateTime<Utc>>,
         updated_at: Option<DateTime<Utc>>,
         start_at: Option<DateTime<Utc>>,
         end_at: Option<DateTime<Utc>>,
-        term_day: u32,
+        term_day: Option<usize>,
     ) -> Vec<DocumentResponse> {
-        let term_duration = chrono::Duration::days(term_day as i64);
+        // term_day が指定されない場合は当日(0日の範囲 = 完全一致相当)とする
+        let term_duration = chrono::Duration::days(term_day.unwrap_or(0) as i64);
 
         // created_at / updated_at / start_at / end_at は String で保持されているため、
         // 範囲比較のためにその場で RFC3339 としてパースする。
@@ -88,18 +88,22 @@ impl Document {
             .filter(|doc| {
                 let match_id = id.is_none() || id == Some(doc.id);
 
-                let match_content =
-                    content.is_empty() || content.iter().all(|kw| doc.content.contains(kw));
+                let match_content = content.map_or(true, |c| {
+                    c.is_empty() || c.iter().all(|kw| doc.content.contains(kw))
+                });
 
                 let match_creator_id = creator_id.is_none() || creator_id == Some(doc.creator.id);
 
-                let match_creator_name = creator_name.is_empty()
-                    || creator_name.iter().all(|kw| doc.creator.name.contains(kw));
+                let match_creator_name = creator_name.map_or(true, |names| {
+                    names.is_empty() || names.iter().all(|kw| doc.creator.name.contains(kw))
+                });
 
-                let match_description = description.is_empty()
-                    || description
-                        .iter()
-                        .all(|kw| doc.description.as_ref().is_some_and(|d| d.contains(kw)));
+                let match_description = description.map_or(true, |kws| {
+                    kws.is_empty()
+                        || kws
+                            .iter()
+                            .all(|kw| doc.description.as_ref().is_some_and(|d| d.contains(kw)))
+                });
 
                 let match_project_id = project_id.is_none()
                     || doc
@@ -107,10 +111,12 @@ impl Document {
                         .as_ref()
                         .is_some_and(|p| project_id == Some(p.id));
 
-                let match_project_name = project_name.is_empty()
-                    || project_name
-                        .iter()
-                        .all(|kw| doc.project.as_ref().is_some_and(|p| p.name.contains(kw)));
+                let match_project_name = project_name.map_or(true, |names| {
+                    names.is_empty()
+                        || names
+                            .iter()
+                            .all(|kw| doc.project.as_ref().is_some_and(|p| p.name.contains(kw)))
+                });
 
                 let within_created_at = created_at.is_none()
                     || created_at.is_some_and(|ca| {
