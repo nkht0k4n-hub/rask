@@ -64,7 +64,9 @@ fn main() -> Result<()> {
                     args.end_at,
                     args.term_duration,
                 );
-
+                if args.list.json {
+                    print_json(&searched_documents)?;
+                } else {
                 for document in searched_documents {
                     println!("{:?}", document);
                 }
