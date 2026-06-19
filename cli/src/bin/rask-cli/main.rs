@@ -66,8 +66,12 @@ fn main() -> Result<()> {
                 )
                 .context("Failed to search documents")?;
 
-                for document in searched_documents {
-                    println!("{:?}", document);
+                if args.list.json {
+                    print_json(&searched_documents)?;
+                } else {
+                    for document in searched_documents {
+                        println!("{:?}", document);
+                    }
                 }
             }
         },
